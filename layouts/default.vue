@@ -55,9 +55,9 @@
     </div>
     <div class="relative top-0 z-10 w-full">
       <div class="flex justify-start items-center px-10 py-5">
-        <p class="text-gray-400 dark:text-gray-200">Arithemania</p>
+        <p class="text-gray-400 dark:text-gray-200">v1.0.0</p>
         <a
-            href="https://github.com/NehaChougule06/DataVault"
+            href="https://github.com/AnshulRanjan2004/DataVault"
             target="_external"
             class="
               px-4
