@@ -1,0 +1,306 @@
+<template>
+  <div class="
+      md:max-w-4xl
+      w-full
+      px-10
+      pb-10
+      pt-3
+      bg-white
+      rounded-xl
+      z-10
+      shadow-xl
+      dark:bg-gray-800
+    ">
+    <div class="grid grid-cols-2 divide-x dark:divide-gray-300 text-gray-500 dark:text-gray-300 font-bold p-5 mb-3">
+      <div class="text-center">
+        <n-link class="
+            rounded-full
+            font-bold
+            px-4
+            py-2
+            transition
+            duration-300
+            ease-in-out
+            betterhover:hover:bg-blue-500
+            betterhover:hover:text-white
+            text-center
+           text-blue-500 dark:text-blue-300" to="/">← Upload Files</n-link>
+      </div>
+      <div class="text-center">Paste Text</div>
+    </div>
+    <div class="text-center" v-if="!encrypting">
+      <h1 class="mb-5 text-sm text-gray-400 dark:text-gray-200">
+        Your text will be encrypted locally on your device then sent to a
+        decentralized storage.
+      </h1>
+    </div>
+    <form class="space-y-3">
+      <div class="grid grid-cols-1 space-y-2">
+        <div class="flex items-center justify-center w-full">
+          <textarea class="w-full text-base
+            p-2
+            border border-gray-300
+            rounded-lg
+            outline-none
+            dark:bg-gray-800 dark:text-white dark:border-gray-500 overflow-hidden break-words resize-none textarea"
+            placeholder="Type or Paste what you want here.." v-model="textInput" ref="textArea"
+            style="height: 200px;"></textarea>
+          <transition enter-active-class="transition-all delay-300 duration-300 ease"
+            leave-active-class="transition-all duration-300 ease" enter-class="opacity-0 transform scale-0"
+            enter-to-class="opacity-100 transform scale-100" leave-class="opacity-100 transform scale-100"
+            leave-to-class="opacity-0 transform scale-0">
+            <div class="
+                flex flex-col
+                rounded-lg
+                w-full
+                h-64
+                group
+                text-center
+                justify-around
+                items-center
+              " v-show="encrypting">
+              <LockIcon v-if="Object.keys(encryptedFiles).length>0 && !encrypting"
+                class="text-green-500 h-30 w-30 min-w-min dark:text-green-400" />
+              <div v-else class="text-center flex flex-col justify-around items-center">
+                <h1 class="
+                    font-bold
+                    text-lg
+                    mb-3
+                    text-gray-600
+                    dark:text-gray-400
+                  ">
+                  Encrypting...
+                </h1>
+                <Spinner />
+              </div>
+              <h1 class="
+                  font-semibold
+                  text-center
+                  my-3
+                  text-gray-400
+                  dark:text-gray-200
+                ">
+                Total size:&nbsp;<span v-if="totalSize > 0">{{
+                totalSize | formatSize
+                }}</span>
+              </h1>
+            </div>
+          </transition>
+        </div>
+        <transition enter-active-class="transition-all delay-500 duration-300 ease-out"
+          leave-active-class="transition-all delay-500 duration-300 ease-in" enter-class="opacity-0 transform scale-0"
+          enter-to-class="opacity-100 transform scale-100" leave-class="opacity-100 transform scale-100"
+          leave-to-class="opacity-0 transform scale-0">
+          <div class="text-center mt-5" v-if="encrypting || Object.keys(encryptedFiles).length>0">
+            <h4 class="
+                text-sm
+                font-bold
+                text-gray-400
+                tracking-wide
+                dark:text-gray-200
+              ">
+              Decryption Key:
+            </h4>
+            <h2 class="
+                text-sm
+                font-bold
+                text-red-500
+                tracking-widest
+                my-3
+                select-all
+                dark:text-red-400
+              " :class="{ 'filter blur-sm': blurPassword }" @mouseenter="blurPassword = false"
+              @mouseleave="blurPassword = true">
+              {{ password }}
+            </h2>
+            <p class="text-sm text-gray-400 dark:text-gray-200">
+              Your text cannot be viewed without this key
+            </p>
+          </div>
+        </transition>
+      </div>
+      <div class="grid grid-cols-1 space-y-2">
+        <label class="
+            text-sm
+            font-bold
+            text-gray-500
+            tracking-wide
+            dark:text-gray-300
+          ">Caption</label>
+        <input class="
+            text-base
+            p-2
+            border border-gray-300
+            rounded-lg
+            outline-none
+            dark:bg-gray-800 dark:text-white dark:border-gray-500
+          " type="text" placeholder="Optional" v-model="caption" />
+        <WalletInput v-if="showAddress" @validated="setAddress" />
+      </div>
+      <div>
+        <button :disabled="textInput.length<1 || encrypting || uploading" :class="{
+          'bg-gray-100 text-gray-400 cursor-not-allowed	shadow dark:bg-gray-600':
+          textInput.length<1 || encrypting || uploading,
+          'bg-blue-500 text-gray-100 focus:outline-none focus:shadow-outline hover:bg-blue-600 shadow-lg cursor-pointer transition ease-in duration-300':
+            !(textInput.length<1 || encrypting || uploading),
+        }" class="
+            mt-5
+            w-full
+            flex
+            justify-center
+            p-4
+            tracking-wide
+            font-semibold
+            rounded-xl
+          " @click.prevent="uploadClicked()">
+          Upload
+        </button>
+      </div>
+    </form>
+    <Modal :message="errorMsg" v-show="errorMsg" @ok="errorMsg = ''" />
+  </div>
+</template>
+<script>
+import { Password, encryptBlob } from '~/utils/encryption'
+import { formatSize, MAXSIZE, MAX_TOTAL_SIZE } from '~/utils/helpers'
+import Modal from './Modal.vue'
+export default {
+  components: { Modal },
+  props: {
+    password: {
+      type: String,
+    },
+  },
+  filters: {
+    formatSize: (val) => {
+      return formatSize(val)
+    },
+  },
+  data() {
+    return {
+      encrypting: false,
+      blurPassword: true,
+      caption: '',
+      uploading: false,
+      showAddress: false,
+      address: '',
+      encryptedFiles: {},
+      totalSize: 0,
+      errorMsg: '',
+      currency: null,
+      textInput: ''
+    }
+  },
+  watch: {
+    textInput(val) {
+      console.log(Math.max(parseFloat(this.$refs.textArea.scrollHeight), parseFloat(this.$refs.textArea.style.height)))
+      this.$refs.textArea.style.height = 'auto'
+      this.$refs.textArea.style.height = '200px'
+      this.$refs.textArea.style.height = Math.max(parseFloat(this.$refs.textArea.scrollHeight), parseFloat(this.$refs.textArea.style.height)) + "px";
+    }
+  },
+  methods: {
+    setAddress(address, currency) {
+      this.address = address
+      this.currency = currency
+    },
+    highlight(e) {
+      // e.preventDefault()
+      this.$refs.dropArea.classList.remove('dark:border-gray-500')
+      this.$refs.dropArea.classList.add('border-red-500')
+      this.$refs.dropArea.classList.add('dark:border-red-400')
+    },
+    unhighlight(e) {
+      // e.preventDefault()
+      this.$refs.dropArea.classList.remove('border-red-500')
+      this.$refs.dropArea.classList.remove('dark:border-red-400')
+      this.$refs.dropArea.classList.add('dark:border-gray-500')
+    },
+    reset() {
+      this.encryptedFiles = {}
+      this.totalSize = 0
+      this.encrypting = false
+    },
+    checkFiles(files) {
+      let total = 0
+      let bufArray = []
+      bufArray.push(new Uint8Array(1 * 1024 * 1024)) // 1 mb for metadata
+
+      for (const file of files) {
+        try {
+          let test = new Uint8Array(file.size)
+          bufArray.push(test)
+        } catch (e) {
+          this.errorMsg = `Files are larger than what your browser memory allows to encrypt, please try another browser or free some memory.`
+          this.reset()
+          return false
+        }
+        if (file.size > MAXSIZE) {
+          this.errorMsg = `The file ${file.fullPath || file.name
+            } is larger than the allowed single file size, please split it into parts.`
+          this.reset()
+          return false
+        }
+        total += file.size
+        if (total > MAX_TOTAL_SIZE) {
+          this.errorMsg = `Total files size is larger than allowed, please remove some files and consider splitting the uploads to multiple parts.`
+          this.reset()
+          return false
+        }
+      }
+      return true
+    },
+    async encryptAndEmit(file, password, index) {
+      const obj = await encryptBlob(file, password)
+      this.encryptedFiles[index] = obj
+      this.totalSize += obj.file.size
+    },
+    async startEncrypting() {
+      if (this.textInput.length < 1) {
+        console.log('nothing to encrypt')
+        this.encrypting = false
+        return
+      }
+      const fileObj = new Blob([this.textInput],{ type: 'text/plain' })
+      const password = Password.generate(16)
+      this.$emit('passwordCreated', password)
+      this.encrypting = true
+      this.encryptedFiles = {}
+      try {
+        await this.encryptAndEmit(fileObj, password, 0)
+      } catch (e) {
+        this.errorMsg = `Unable to encrypt data.`
+        console.error(e)
+        this.reset()
+      }
+      console.log(this.encryptedFiles)
+      this.encrypting = false
+    },
+    async uploadClicked() {
+      if (this.address && !this.currency) {
+        this.errorMsg = `Your tipping address is not recognized a valid format, please add a correct BTC or XMR address.`
+        return
+      }
+      await this.startEncrypting()
+      if (Object.keys(this.encryptedFiles).length == 0) return
+      this.uploading = true
+      let addresses = []
+      if (this.address && this.currency) {
+        addresses.push({ address: this.address, currency: this.currency })
+      }
+      this.$emit('upload', {
+        files: this.encryptedFiles,
+        password: this.password,
+        caption: this.caption,
+        addresses: addresses,
+      }, true)
+    },
+  },
+}
+</script>
+<style>
+.textarea {
+  min-height: 200px;
+  line-height: 20px;
+}
+</style>
