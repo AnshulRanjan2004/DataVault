@@ -24,6 +24,4 @@ $ npm run generate
 
 ![image](https://user-images.githubusercontent.com/91585064/231111510-9311abc6-692d-443a-8c06-f7019094b253.png)
 
-![image](https://user-images.githubusercontent.com/91585064/231112403-d6e528c1-8c78-454a-836d-443f5aa3da1f.png)             ![image](https://user-images.githubusercontent.com/91585064/231111932-72ac8952-3b7d-474a-a428-3b38e3fc22e0.png)         ![image](https://user-images.githubusercontent.com/91585064/231112006-0b095eaf-7943-46d6-944d-da4603fee0b4.png)
-
-
+![image](https://user-images.githubusercontent.com/91585064/231112403-d6e528c1-8c78-454a-836d-443f5aa3da1f.png)                      ![image](https://user-images.githubusercontent.com/91585064/231111932-72ac8952-3b7d-474a-a428-3b38e3fc22e0.png)
