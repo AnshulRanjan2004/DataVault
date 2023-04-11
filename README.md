@@ -21,7 +21,6 @@ $ npm run generate
 
 ![image](https://user-images.githubusercontent.com/91585064/231111116-30862ace-48d1-4da0-a3d7-d0155e16d6d1.png)
 
-![image](https://user-images.githubusercontent.com/91585064/231111398-52358914-cc74-479c-bb7c-91f273d6e733.png)
 
 ![image](https://user-images.githubusercontent.com/91585064/231111510-9311abc6-692d-443a-8c06-f7019094b253.png)
 
