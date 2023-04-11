@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[14],{281:function(n,t,l){"use strict";l.r(t);var e={head:()=>({title:"DataVault - Download & Decrypt"})},c=l(14),component=Object(c.a)(e,(function(){return(0,this._self._c)("n-child")}),[],!1,null,null,null);t.default=component.exports}}]);
