@@ -1,0 +1,37 @@
+[
+  {
+    "name": "d",
+    "path": "/d",
+    "component": "C:\\\\Notes and slides\\\\DataVault\\\\pages\\\\d.vue",
+    "chunkName": "pages/d",
+    "children": [
+      {
+        "name": "d-cid",
+        "path": ":cid?",
+        "component": "C:\\\\Notes and slides\\\\DataVault\\\\pages\\\\d\\\\_cid.vue",
+        "chunkName": "pages/d/_cid"
+      }
+    ]
+  },
+  {
+    "name": "myfiles",
+    "path": "/myfiles",
+    "component": "C:\\\\Notes and slides\\\\DataVault\\\\pages\\\\myfiles.vue",
+    "chunkName": "pages/myfiles",
+    "url": "/myfiles"
+  },
+  {
+    "name": "paste",
+    "path": "/paste",
+    "component": "C:\\\\Notes and slides\\\\DataVault\\\\pages\\\\paste.vue",
+    "chunkName": "pages/paste",
+    "url": "/paste"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "C:\\\\Notes and slides\\\\DataVault\\\\pages\\\\index.vue",
+    "chunkName": "pages/index",
+    "url": "/"
+  }
+]
